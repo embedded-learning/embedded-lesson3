@@ -1,0 +1,157 @@
+export PATH="$(brew --prefix python@3.12)/libexec/bin:$PATH" && . $HOME/esp/esp-idf/export.sh >/dev/null && idf.py -p /dev/cu.usbmodem5CBC0266421 flash monitor
+[38;5;208mActivating ESP-IDF [0m[1;38;5;208m6.0[0m
+Setting IDF_PATH to [32m'/Users/szhov/esp/esp-idf'[0m.
+[38;5;208m*[0m Checking python version [33m...[0m [1;32m3.12[0m[32m.[0m[1;32m14[0m
+[38;5;208m*[0m Checking python dependencies [33m...[0m [32mOK[0m
+[38;5;208m*[0m Deactivating the current ESP-IDF environment [1m([0mif any[1m)[0m [33m...[0m [32mOK[0m
+[38;5;208m*[0m Establishing a new ESP-IDF environment [33m...[0m [32mOK[0m
+[38;5;208m*[0m Identifying shell [33m...[0m [32mbash[0m
+[38;5;208m*[0m Detecting outdated tools in system [33m...[0m [32mOK - no outdated tools found[0m
+[38;5;208m*[0m Shell completion [33m...[0m [32mAutocompletion code generated[0m
+Adding "flash"'s dependency "all" to list of commands with default set of options.
+Executing action: all (aliases: build)
+Running ninja in directory /Users/szhov/work/embedded/esp32-lesson3/build
+Executing "ninja all"...
+[1/9] Performing build step for 'bootloader'[K[1/1] cd /Users/szhov/work/embedded/esp32-lesson3/build/bootloader && /Users/szhov/.espressif/python_en...--offset 0x8000 bootloader 0x0 /Users/szhov/work/embedded/esp32-lesson3/build/bootloader/bootloader.bin[K
+Bootloader binary size 0x52c0 bytes. 0x2d40 bytes (35%) free.
+[2/9] Building C object esp-idf/main/CMakeFiles/__idf_main.dir/main.c.obj[K[3/9] No install step for 'bootloader'[K[4/9] Completed 'bootloader'[K[5/9] Linking C static library esp-idf/main/libmain.a[K[6/9] Generating esp-idf/esp_system/ld/sections.ld[K
+[38;2;0;119;187mNOTE:[0m /Users/szhov/esp/esp-idf/components/bt/host/nimble/Kconfig.in:1453: BT_NIMBLE_MESH_PROVISIONER: 'default 0' is not a valid bool value (only 'y' and 'n' are allowed). Value is treated as 'n'.
+[38;2;0;119;187mNOTE:[0m /Users/szhov/esp/esp-idf/components/fatfs/Kconfig:230: FATFS_PRINT_LLI: 'default 0' is not a valid bool value (only 'y' and 'n' are allowed). Value is treated as 'n'.
+[38;2;0;119;187mNOTE:[0m /Users/szhov/esp/esp-idf/components/fatfs/Kconfig:235: FATFS_PRINT_FLOAT: 'default 0' is not a valid bool value (only 'y' and 'n' are allowed). Value is treated as 'n'.
+[7/9] Linking CXX executable esp32-lesson3.elf; Checking ioctl definition overlaps[K[8/9] Generating binary image from built executable[K
+esptool v5.4.0
+Creating ESP32-S3 image...
+Merged 3 ELF sections.
+Successfully created ESP32-S3 image.
+Generated /Users/szhov/work/embedded/esp32-lesson3/build/esp32-lesson3.bin
+[9/9] cd /Users/szhov/work/embedded/esp32-lesson3/build && /Users/szhov/.espressif/python_env/idf6.0_py...ld/partition_table/partition-table.bin /Users/szhov/work/embedded/esp32-lesson3/build/esp32-lesson3.bin[K
+esp32-lesson3.bin binary size 0x2a0d0 bytes. Smallest app partition is 0x100000 bytes. 0xd5f30 bytes (84%) free.
+Executing action: flash
+Running ninja in directory /Users/szhov/work/embedded/esp32-lesson3/build
+Executing "ninja flash"...
+[1/5] cd /Users/szhov/work/embedded/esp32-lesson3/build && /Users/szhov/.espressif/python_env/idf6.0_py3.12_env/bin/python /Users/szhov/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 partition --type app /Users/szhov/work/embedded/esp32-lesson3/build/partition_table/partition-table.bin /Users/szhov/work/embedded/esp32-lesson3/build/esp32-lesson3.bin
+esp32-lesson3.bin binary size 0x2a0d0 bytes. Smallest app partition is 0x100000 bytes. 0xd5f30 bytes (84%) free.
+[2/5] Performing build step for 'bootloader'
+[1/1] cd /Users/szhov/work/embedded/esp32-lesson3/build/bootloader && /Users/szhov/.espressif/python_env/idf6.0_py3.12_env/bin/python /Users/szhov/esp/esp-idf/components/partition_table/check_sizes.py --offset 0x8000 bootloader 0x0 /Users/szhov/work/embedded/esp32-lesson3/build/bootloader/bootloader.bin
+Bootloader binary size 0x52c0 bytes. 0x2d40 bytes (35%) free.
+[3/5] No install step for 'bootloader'
+[4/5] Completed 'bootloader'
+[4/5] Running utility command for flash
+esptool --chip esp32s3 -p /dev/cu.usbmodem5CBC0266421 -b 460800 --before=default-reset --after=hard-reset write-flash --flash-mode dio --flash-freq 80m --flash-size 2MB 0x0 bootloader/bootloader.bin 0x8000 partition_table/partition-table.bin 0x10000 esp32-lesson3.bin
+esptool v5.4.0
+Serial port /dev/cu.usbmodem5CBC0266421:
+Connecting....
+[1A[2K[1A[2KConnected to ESP32-S3 on /dev/cu.usbmodem5CBC0266421:
+Chip type:          ESP32-S3 (QFN56) (revision v0.2)
+Features:           Wi-Fi, BT 5 (LE), Dual Core + LP Core, 240MHz, Embedded PSRAM 8MB (AP_3v3)
+Crystal frequency:  40MHz
+MAC:                ac:27:6e:aa:7d:e0
+
+Uploading stub flasher...
+Running stub flasher...
+[1A[2K[1A[2KStub flasher running.
+Changing baud rate to 460800...
+Changed.
+
+Configuring flash size...
+
+Writing 'bootloader/bootloader.bin' at 0x00000000...
+SHA digest in image updated.
+Flash will be erased from 0x00000000 to 0x00005fff...
+Compressed 21184 bytes to 13623...
+[2KWriting at 0x000052c0 [38;2;114;156;31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m 100.0% 13.30kB/13.30kB [0s] 
+[1A[2K[1A[2KWrote 21184 bytes (13623 compressed) at 0x00000000 in 0.5 seconds (315.5 kbit/s).
+Verifying written data...
+[1A[2KHash of data verified.
+
+Writing 'partition_table/partition-table.bin' at 0x00008000...
+Flash will be erased from 0x00008000 to 0x00008fff...
+Compressed 3072 bytes to 103...
+[2KWriting at 0x00008c00 [38;2;114;156;31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m 100.0% 103B/103B [0s] 
+[1A[2K[1A[2KWrote 3072 bytes (103 compressed) at 0x00008000 in 0.0 seconds (753.6 kbit/s).
+Verifying written data...
+[1A[2KHash of data verified.
+
+Writing 'esp32-lesson3.bin' at 0x00010000...
+Flash will be erased from 0x00010000 to 0x0003afff...
+Compressed 172240 bytes to 94691...
+[2KWriting at 0x0001c139 [38;2;249;38;114m━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━━━━━━[0m  17.3% 16.00kB/92.47kB [0s] [2KWriting at 0x00022220 [38;2;249;38;114m━━━━━━━━━━[0m[38;5;237m╺[0m[38;5;237m━━━━━━━━━━━━━━━━━━━[0m  34.6% 32.00kB/92.47kB [0s] [2KWriting at 0x000283bc [38;2;249;38;114m━━━━━━━━━━━━━━━[0m[38;2;249;38;114m╸[0m[38;5;237m━━━━━━━━━━━━━━[0m  51.9% 48.00kB/92.47kB [1s] [2KWriting at 0x0002e71b [38;2;249;38;114m━━━━━━━━━━━━━━━━━━━━[0m[38;2;249;38;114m╸[0m[38;5;237m━━━━━━━━━[0m  69.2% 64.00kB/92.47kB [1s] [2KWriting at 0x0003501b [38;2;249;38;114m━━━━━━━━━━━━━━━━━━━━━━━━━[0m[38;2;249;38;114m╸[0m[38;5;237m━━━━[0m  86.5% 80.00kB/92.47kB [1s] [2KWriting at 0x0003a0d0 [38;2;114;156;31m━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━[0m 100.0% 92.47kB/92.47kB [2s] 
+[1A[2K[1A[2KWrote 172240 bytes (94691 compressed) at 0x00010000 in 2.5 seconds (550.6 kbit/s).
+Verifying written data...
+[1A[2KHash of data verified.
+
+Hard resetting via RTS pin...
+Executing action: monitor
+Running idf_monitor in directory /Users/szhov/work/embedded/esp32-lesson3
+Executing "/Users/szhov/.espressif/python_env/idf6.0_py3.12_env/bin/python /Users/szhov/esp/esp-idf/tools/idf_monitor.py -p /dev/cu.usbmodem5CBC0266421 -b 115200 --toolchain-prefix xtensa-esp32s3-elf- --target esp32s3 --revision 0 /Users/szhov/work/embedded/esp32-lesson3/build/esp32-lesson3.elf /Users/szhov/work/embedded/esp32-lesson3/build/bootloader/bootloader.elf -m '/Users/szhov/.espressif/python_env/idf6.0_py3.12_env/bin/python' '/Users/szhov/esp/esp-idf/tools/idf.py' '-p' '/dev/cu.usbmodem5CBC0266421'"...
+--- esp-idf-monitor 1.10.0 on /dev/cu.usbmodem5CBC0266421 115200
+--- Quit: Ctrl+] | Menu: Ctrl+T | Help: Ctrl+T followed by Ctrl+H
+0 len �ESP-ROM:esp32s3-20210327
+Build:Mar 27 2021
+rst:0x1 (POWERON),boot:0x8 (SPI_FAST_FLASH_BOOT)
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fce2820,len:0x1534
+load:0x403c8700,len:0xda0
+--- 0x403c8700: _stext at ??:?
+load:0x403cb700,len:0x2f94
+entry 0x403c8908
+--- 0x403c8908: call_start_cpu0 at /Users/szhov/esp/esp-idf/components/bootloader/subproject/main/bootloader_start.c:27
+[0;32mI (24) boot: ESP-IDF v6.0.3 2nd stage bootloader[0m
+[0;32mI (25) boot: compile time Oct 15 2026 19:05:54[0m
+[0;32mI (25) boot: Multicore bootloader[0m
+[0;32mI (25) boot: chip revision: v0.2[0m
+[0;32mI (28) boot: efuse block revision: v1.4[0m
+[0;32mI (31) boot.esp32s3: Boot SPI Speed : 80MHz[0m
+[0;32mI (35) boot.esp32s3: SPI Mode       : DIO[0m
+[0;32mI (39) boot.esp32s3: SPI Flash Size : 2MB[0m
+[0;32mI (43) boot: Enabling RNG early entropy source...[0m
+[0;32mI (47) boot: Partition Table:[0m
+[0;32mI (50) boot: ## Label            Usage          Type ST Offset   Length[0m
+[0;32mI (56) boot:  0 nvs              WiFi data        01 02 00009000 00006000[0m
+[0;32mI (63) boot:  1 phy_init         RF data          01 01 0000f000 00001000[0m
+[0;32mI (69) boot:  2 factory          factory app      00 00 00010000 00100000[0m
+[0;32mI (76) boot: End of partition table[0m
+[0;32mI (79) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=0967ch ( 38524) map[0m
+[0;32mI (93) esp_image: segment 1: paddr=000196a4 vaddr=3fc90300 size=0309ch ( 12444) load[0m
+[0;32mI (96) esp_image: segment 2: paddr=0001c748 vaddr=40374000 size=038d0h ( 14544) load[0m
+[0;32mI (104) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=116d0h ( 71376) map[0m
+[0;32mI (121) esp_image: segment 4: paddr=000316f8 vaddr=403778d0 size=08988h ( 35208) load[0m
+[0;32mI (130) esp_image: segment 5: paddr=0003a088 vaddr=50000000 size=00024h (    36) load[0m
+[0;32mI (135) boot: Loaded app from partition at offset 0x10000[0m
+[0;32mI (135) boot: Disabling RNG early entropy source...[0m
+[0;32mI (147) cpu_start: Multicore app[0m
+[0;32mI (156) cpu_start: GPIO 44 and 43 are used as console UART I/O pins[0m
+[0;32mI (157) cpu_start: Pro cpu start user code[0m
+[0;32mI (157) cpu_start: cpu freq: 160000000 Hz[0m
+[0;32mI (158) app_init: Application information:[0m
+[0;32mI (162) app_init: Project name:     esp32-lesson3[0m
+[0;32mI (166) app_init: App version:      fb1c2cf-dirty[0m
+[0;32mI (171) app_init: Compile time:     Oct 15 2026 19:05:38[0m
+[0;32mI (176) app_init: ELF file SHA256:  f7c75010b...[0m
+[0;32mI (180) app_init: ESP-IDF:          v6.0.3[0m
+[0;32mI (184) efuse_init: Min chip rev:     v0.0[0m
+[0;32mI (188) efuse_init: Max chip rev:     v0.99 [0m
+[0;32mI (192) efuse_init: Chip rev:         v0.2[0m
+[0;32mI (196) heap_init: Initializing. RAM available for dynamic allocation:[0m
+[0;32mI (202) heap_init: At 3FC93D80 len 00055990 (342 KiB): RAM[0m
+[0;32mI (207) heap_init: At 3FCE9710 len 00005724 (21 KiB): RAM[0m
+[0;32mI (212) heap_init: At 3FCF0000 len 00008000 (32 KiB): DRAM[0m
+[0;32mI (217) heap_init: At 600FE000 len 00001FE8 (7 KiB): RTCRAM[0m
+[0;32mI (224) spi_flash: detected chip: mxic[0m
+[0;32mI (226) spi_flash: flash io: dio[0m
+[0;33mW (229) spi_flash: Detected size(16384k) larger than the size in the binary image header(2048k). Using the size in the binary image header.[0m
+[0;32mI (242) sleep_gpio: Configure to isolate all GPIO pins in sleep state[0m
+[0;32mI (248) sleep_gpio: Enable automatic switching of GPIO sleep configuration[0m
+[0;32mI (255) main_task: Started on CPU0[0m
+[0;32mI (275) main_task: Calling app_main()[0m
+LINE CHECK: 1000 of 1000 reads are HIGH
+[0;32mI (275) main_task: Returned from app_main()[0m
+PRESS: transitions=0, pulses=0, bounce=0 us
+RELEASE: transitions=0, pulses=0, bounce=0 us
+PRESS: transitions=0, pulses=0, bounce=0 us
+RELEASE: transitions=2, pulses=1, bounce=1329 us
+PRESS: transitions=0, pulses=0, bounce=0 us
+RELEASE: transitions=0, pulses=0, bounce=0 us
+
+Done

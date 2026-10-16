@@ -1,105 +1,74 @@
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 #include "driver/gpio.h"
+#include "esp_attr.h"
+#include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
-#include "esp_random.h"
-#include <stdio.h>
-#include <stdint.h>
 
-#define RED_LED GPIO_NUM_15
-#define BLUE_LED GPIO_NUM_16
-#define BLINK_FAST_MODE_BUTTON GPIO_NUM_21
-#define BLINK_SLOW_MODE_BUTTON GPIO_NUM_0
+#define BUTTON_PIN            GPIO_NUM_16
+#define PRESSED_LEVEL         0
+#define QUIET_WINDOW_MS       20
+#define LINE_CHECK_SAMPLES    1000
 
-#define BUTTON_ON_CLICK_DELAY_MS 50
-#define LED_OFF 0
-#define LED_ON 1
-#define FAST_MODE 200
-#define SLOW_MODE 1000
 
-void separeteSlowMode();
-void combineFastMode();
-typedef enum {
-    MODE_SLOW,
-    MODE_FAST
-} mod_t;
-typedef struct {
-    gpio_num_t pin;
-    mod_t mode;
-} button_config_t;
+static volatile uint32_t edgeCount = 0;
+static volatile int64_t  firstEdgeUs = 0;
+static volatile int64_t  lastEdgeUs = 0;
+static TaskHandle_t      buttonTaskHandle = NULL;
+static void IRAM_ATTR handleButtonEdge(void *argument) {
+    int64_t nowUs = esp_timer_get_time();
 
-button_config_t fastModeButton = { .pin = BLINK_FAST_MODE_BUTTON, .mode = MODE_FAST };
-button_config_t slowModeButton = { .pin = BLINK_SLOW_MODE_BUTTON, .mode = MODE_SLOW };
+    if (edgeCount == 0) {
+        firstEdgeUs = nowUs;
+    }
+    lastEdgeUs = nowUs;
+    edgeCount++;
 
-volatile mod_t mode = MODE_SLOW;
-void ledHandlerTask(void *taskParameter);
-void buttonHandlerTask(void *taskParameter);
+    BaseType_t isHigherPriorityTaskWoken = pdFALSE;
+    vTaskNotifyGiveFromISR(buttonTaskHandle, &isHigherPriorityTaskWoken);
+    portYIELD_FROM_ISR(isHigherPriorityTaskWoken);
+}
+
+static void printLineRestCheck(gpio_num_t pin) {
+    uint32_t highCount = 0;
+    for (uint32_t sampleIndex = 0; sampleIndex < LINE_CHECK_SAMPLES; sampleIndex++) {
+        highCount += gpio_get_level(pin);
+    }
+    printf("LINE CHECK: %lu of %d reads are HIGH\n",
+           (unsigned long)highCount, LINE_CHECK_SAMPLES);
+}
+
+static void buttonEventTask(void *taskParameter) {
+    while (true) {
+        ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+
+        while (ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(QUIET_WINDOW_MS)) != 0) {
+        }
+
+        uint32_t transitionCount  = edgeCount - 1;
+        int64_t  bounceDurationUs = lastEdgeUs - firstEdgeUs;
+        int      finalLevel       = gpio_get_level(BUTTON_PIN);
+        edgeCount = 0;
+
+        const char *eventName = finalLevel == PRESSED_LEVEL ? "PRESS" : "RELEASE";
+        printf("%s: transitions=%lu, pulses=%lu, bounce=%lld us\n",
+               eventName,
+               (unsigned long)transitionCount,
+               (unsigned long)(transitionCount / 2),
+               (long long)bounceDurationUs);
+    }
+}
 
 void app_main(void) {
+    gpio_reset_pin(BUTTON_PIN);
+    gpio_set_direction(BUTTON_PIN, GPIO_MODE_INPUT);
+    gpio_set_pull_mode(BUTTON_PIN, GPIO_PULLUP_ONLY);
+    printLineRestCheck(BUTTON_PIN);
+    xTaskCreate(buttonEventTask, "BUTTON_EVENT", 4096, NULL, 10, &buttonTaskHandle);
 
-    gpio_reset_pin(RED_LED);
-    gpio_reset_pin(BLUE_LED);
-    gpio_reset_pin(BLINK_FAST_MODE_BUTTON);
-    gpio_reset_pin(BLINK_SLOW_MODE_BUTTON);
-
-    gpio_set_direction(BLINK_FAST_MODE_BUTTON, GPIO_MODE_INPUT);
-    gpio_set_pull_mode(BLINK_FAST_MODE_BUTTON, GPIO_PULLUP_ONLY);
-    gpio_set_direction(BLINK_SLOW_MODE_BUTTON, GPIO_MODE_INPUT);
-    gpio_set_pull_mode(BLINK_SLOW_MODE_BUTTON, GPIO_PULLUP_ONLY);
-
-    gpio_set_direction(RED_LED, GPIO_MODE_OUTPUT);
-    gpio_set_direction(BLUE_LED, GPIO_MODE_OUTPUT);
-
-    gpio_set_level(BLUE_LED, LED_OFF);
-    gpio_set_level(RED_LED, LED_OFF);
-
-    xTaskCreate( buttonHandlerTask, "CLICK_TASK_FAST", 2048, &fastModeButton, 20, NULL);
-    xTaskCreate( buttonHandlerTask, "CLICK_TASK_SLOW", 2048, &slowModeButton, 20, NULL);
-    xTaskCreate( ledHandlerTask, "BLINK_TASK", 2048, NULL, 10, NULL);
-
+    ESP_ERROR_CHECK(gpio_install_isr_service(0));
+    ESP_ERROR_CHECK(gpio_set_intr_type(BUTTON_PIN, GPIO_INTR_ANYEDGE));
+    ESP_ERROR_CHECK(gpio_isr_handler_add(BUTTON_PIN, handleButtonEdge, NULL));
 }
-
-void ledHandlerTask(void *taskParameter){
-    while (1) {
-    if (mode == MODE_SLOW) {
-        separeteSlowMode();
-    }else {
-        combineFastMode();
-    }
-}}
-
-void buttonHandlerTask(void *taskParameter){
-    button_config_t *button = (button_config_t *)taskParameter;
-    while (1) {
-        if(gpio_get_level(button->pin) == 0){
-            vTaskDelay(pdMS_TO_TICKS(BUTTON_ON_CLICK_DELAY_MS));
-            if (gpio_get_level(button->pin) == 0) {
-                mode = button->mode;
-                while(gpio_get_level(button->pin) == 0){
-                  vTaskDelay(pdMS_TO_TICKS(20));
-                }
-            }
-        }
-        vTaskDelay(pdMS_TO_TICKS(20));
-        }
-}
-
-void combineFastMode(){
-    gpio_set_level(BLUE_LED, LED_ON);
-    gpio_set_level(RED_LED, LED_ON);
-    vTaskDelay(pdMS_TO_TICKS(FAST_MODE));
-    gpio_set_level(BLUE_LED, LED_OFF);
-    gpio_set_level(RED_LED, LED_OFF);
-    vTaskDelay(pdMS_TO_TICKS(FAST_MODE));
-}
-
-void separeteSlowMode(){
-    gpio_set_level(BLUE_LED, LED_ON);
-    gpio_set_level(RED_LED, LED_OFF);
-    vTaskDelay(pdMS_TO_TICKS(SLOW_MODE));
-    gpio_set_level(BLUE_LED, LED_OFF);
-    gpio_set_level(RED_LED, LED_ON);
-    vTaskDelay(pdMS_TO_TICKS(SLOW_MODE));
-}
-
-
